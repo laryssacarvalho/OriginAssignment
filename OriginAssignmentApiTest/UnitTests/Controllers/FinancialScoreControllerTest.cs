@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Moq.AutoMock;
 using OriginAssignmentApi.Controllers;
 using OriginAssignmentApi.Enums;
@@ -24,13 +25,14 @@ namespace OriginAssignmentApiTest.Controllers
             var request = new CalculateFinancialScoreRequest(1000, 10);
 
             //Act
-            var result = _sut.CalculateScore(request);
+            var result = _sut.CalculateScore(request) as ObjectResult;
+            //var result = await _sut.GetAllAsync(CancellationToken.None) as ObjectResult;
+            var response = result.Value as CalculateFinancialScoreResponse;
 
             //Assert
             _mocker.GetMock<IFinancialScoreService>()
-                .Verify(x => x.CalculateFinancialScore(It.Is<double>(x => x == request.AnnualIncome), It.Is<double>(x => x == request.MonthlyCosts)), Times.Once);
-            Assert.IsType<CalculateFinancialScoreResponse>(result);
-            Assert.Equal(FinancialScoreType.Healthy, result.Score);
+                .Verify(x => x.CalculateFinancialScore(It.Is<double>(x => x == request.AnnualIncome), It.Is<double>(x => x == request.MonthlyCosts)), Times.Once);            
+            Assert.Equal(FinancialScoreType.Healthy, response.Score);
         }
     }
 }
